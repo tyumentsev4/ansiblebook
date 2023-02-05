@@ -1,6 +1,5 @@
 #!/usr/bin/env ansible-playbook
 ---
-
 - name: Play to test vagrant VM
   hosts: all:!localhost
   gather_facts: true
@@ -9,7 +8,7 @@
     - name: Forward Agent
       copy:
         dest: /home/vagrant/.ssh/config
-        content: 'ForwardAgent yes'
+        content: "ForwardAgent yes"
         owner: vagrant
         group: vagrant
         mode: 0600
@@ -30,4 +29,3 @@
 
   roles:
     - role: java
-...
