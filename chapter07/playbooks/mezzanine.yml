@@ -5,13 +5,13 @@
 
   vars:
     user: "{{ ansible_user }}"
-    proj_app: 'mezzanine_example'
+    proj_app: "mezzanine_example"
     proj_name: "{{ proj_app }}"
     venv_home: "{{ ansible_env.HOME }}/.virtualenvs"
     venv_path: "{{ venv_home }}/{{ proj_name }}"
     proj_path: "{{ ansible_env.HOME }}/mezzanine/{{ proj_name }}"
     settings_path: "{{ proj_path }}/{{ proj_name }}"
-    reqs_path: '~/requirements.txt'
+    reqs_path: "~/requirements.txt"
     manage: "{{ python }} {{ proj_path }}/manage.py"
     live_hostname: 192.168.56.10.nip.io
     domains:
@@ -216,16 +216,16 @@
         DJANGO_SETTINGS_MODULE: "{{ proj_app }}.settings"
         WEBSITE_DOMAIN: "{{ live_hostname }}"
 
-    - name: Set the admin password
+    - name: Set the admin password and email
       ansible.builtin.script: scripts/setadmin.py
       environment:
         PATH: "{{ venv_path }}/bin"
         PROJECT_DIR: "{{ proj_path }}"
         PROJECT_APP: "{{ proj_app }}"
         ADMIN_PASSWORD: "{{ admin_pass }}"
+        ADMIN_EMAIL: "{{ admin_email }}"
 
   handlers:
-
     - name: Restart supervisor
       become: true
       community.general.supervisorctl:
@@ -237,4 +237,3 @@
       ansible.builtin.service:
         name: nginx
         state: restarted
-...
