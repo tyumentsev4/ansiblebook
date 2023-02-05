@@ -36,7 +36,7 @@
   tasks:
     - name: Install apt packages
       become: true
-      apt:
+      ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
         pkg:
@@ -54,13 +54,13 @@
           - supervisor
 
     - name: Create project path
-      file:
+      ansible.builtin.file:
         path: "{{ proj_path }}"
         state: directory
         mode: 0755
 
     - name: Create a logs directory
-      file:
+      ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/logs"
         state: directory
         mode: 0755
@@ -68,7 +68,7 @@
     ### run this when you run into permission problems:
     # $  ssh-keygen -R 192.168.56.10
     - name: Check out the repository on the host
-      git:
+      ansible.builtin.git:
         repo: "{{ repo_url }}"
         dest: "{{ proj_path }}"
         version: master
@@ -76,42 +76,42 @@
         update: false
 
     - name: Create python3 virtualenv
-      pip:
+      ansible.builtin.pip:
         name:
           - pip
           - wheel
           - setuptools
-        state: latest
+        state: present
         virtualenv: "{{ venv_path }}"
         virtualenv_command: /usr/bin/python3 -m venv
 
     - name: Copy requirements.txt to home directory
-      copy:
+      ansible.builtin.copy:
         src: requirements.txt
         dest: "{{ reqs_path }}"
         mode: 0644
 
     - name: Install packages listed in requirements.txt
-      pip:
+      ansible.builtin.pip:
         virtualenv: "{{ venv_path }}"
         requirements: "{{ reqs_path }}"
 
     - name: Create project locale
       become: true
-      locale_gen:
+      community.general.locale_gen:
         name: "{{ locale }}"
 
     - name: Create a DB user
       become: true
       become_user: postgres
-      postgresql_user:
+      community.postgresql.postgresql_user:
         name: "{{ database_user }}"
         password: "{{ db_pass }}"
 
     - name: Create the database
       become: true
       become_user: postgres
-      postgresql_db:
+      community.postgresql.postgresql_db:
         name: "{{ database_name }}"
         owner: "{{ database_user }}"
         encoding: UTF8
@@ -121,14 +121,14 @@
 
     - name: Ensure config path exists
       become: true
-      file:
+      ansible.builtin.file:
         path: "{{ conf_path }}"
         state: directory
         mode: 0755
 
     - name: Create tls certificates
       become: true
-      command: >
+      ansible.builtin.command: >
         openssl req -new -x509 -nodes -out {{ proj_name }}.crt
         -keyout {{ proj_name }}.key -subj '/CN={{ domains[0] }}' -days 365
       args:
@@ -139,14 +139,14 @@
 
     - name: Remove the default nginx config file
       become: true
-      file:
+      ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
       notify: Restart nginx
 
     - name: Set the nginx config file
       become: true
-      template:
+      ansible.builtin.template:
         src: templates/nginx.conf.j2
         dest: /etc/nginx/sites-available/mezzanine.conf
         mode: 0640
@@ -154,7 +154,7 @@
 
     - name: Enable the nginx config file
       become: true
-      file:
+      ansible.builtin.file:
         src: /etc/nginx/sites-available/mezzanine.conf
         dest: /etc/nginx/sites-enabled/mezzanine.conf
         state: link
@@ -163,33 +163,33 @@
 
     - name: Set the supervisor config file
       become: true
-      template:
+      ansible.builtin.template:
         src: templates/supervisor.conf.j2
         dest: /etc/supervisor/conf.d/mezzanine.conf
         mode: 0640
       notify: Restart supervisor
 
     - name: Install poll twitter cron job
-      cron:
+      ansible.builtin.cron:
         name: "poll twitter"
         minute: "*/5"
         user: "{{ user }}"
         job: "{{ manage }} poll_twitter"
 
     - name: Set the gunicorn config file
-      template:
+      ansible.builtin.template:
         src: templates/gunicorn.conf.py.j2
         dest: "{{ proj_path }}/gunicorn.conf.py"
         mode: 0750
 
     - name: Generate the settings file
-      template:
+      ansible.builtin.template:
         src: templates/local_settings.py.j2
         dest: "{{ settings_path }}/local_settings.py"
         mode: 0750
 
     - name: Initialize the database
-      django_manage:
+      community.general.django_manage:
         command: createdb --noinput --nodata
         app_path: "{{ proj_path }}"
         virtualenv: "{{ venv_path }}"
@@ -198,7 +198,7 @@
         - createdb
 
     - name: Apply migrations to create the database, collect static content
-      django_manage:
+      community.general.django_manage:
         command: "{{ item }}"
         app_path: "{{ proj_path }}"
         virtualenv: "{{ venv_path }}"
@@ -208,7 +208,7 @@
         - collectstatic
 
     - name: Set the site id
-      script: scripts/setsite.py
+      ansible.builtin.script: scripts/setsite.py
       environment:
         PATH: "{{ venv_path }}/bin"
         PROJECT_DIR: "{{ proj_path }}"
@@ -217,7 +217,7 @@
         WEBSITE_DOMAIN: "{{ live_hostname }}"
 
     - name: Set the admin password
-      script: scripts/setadmin.py
+      ansible.builtin.script: scripts/setadmin.py
       environment:
         PATH: "{{ venv_path }}/bin"
         PROJECT_DIR: "{{ proj_path }}"
@@ -228,13 +228,13 @@
 
     - name: Restart supervisor
       become: true
-      supervisorctl:
+      community.general.supervisorctl:
         name: "{{ gunicorn_procname }}"
         state: restarted
 
     - name: Restart nginx
       become: true
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
 ...
