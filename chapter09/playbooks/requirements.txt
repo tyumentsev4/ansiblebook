@@ -1,6 +1,7 @@
 Mezzanine==4.3.1
+filebrowser-safe==0.5.0
 gunicorn
 setproctitle
+psycopg2==2.8.6
 django-compressor
-psycopg2-binary==2.8.6
 python-memcached
