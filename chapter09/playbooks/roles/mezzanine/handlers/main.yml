@@ -3,6 +3,6 @@
 - name: Restart supervisor
   become: true
   community.general.supervisorctl:
-    name: gunicorn_mezzanine
+    name: "{{ mezzanine_gunicorn_procname }}"
     state: restarted
 ...

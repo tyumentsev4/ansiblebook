@@ -31,6 +31,7 @@
     PROJECT_DIR: "{{ mezzanine_proj_path }}"
     PROJECT_APP: "{{ mezzanine_proj_app }}"
     ADMIN_PASSWORD: "{{ admin_pass }}"
+    ADMIN_EMAIL: "{{ admin_email }}"
 
 - name: Set the gunicorn config file
   ansible.builtin.template:
@@ -44,7 +45,7 @@
     src: supervisor.conf.j2
     dest: /etc/supervisor/conf.d/mezzanine.conf
     mode: 0640
-  notify: restart supervisor
+  notify: Restart supervisor
 
 - name: Install poll twitter cron job
   ansible.builtin.cron:

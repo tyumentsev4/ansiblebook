@@ -5,6 +5,7 @@
 # PROJECT_DIR: root directory of the project
 # PROJECT_APP: name of the project app
 # ADMIN_PASSWORD: admin user's password
+# ADMIN_EMAIL: admin user's email
 
 import os
 import sys
@@ -21,5 +22,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 u, _ = User.objects.get_or_create(username='admin')
 u.is_staff = u.is_superuser = True
+u.email = os.environ['ADMIN_EMAIL']
 u.set_password(os.environ['ADMIN_PASSWORD'])
 u.save()
