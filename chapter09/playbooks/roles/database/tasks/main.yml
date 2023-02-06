@@ -2,14 +2,14 @@
 
 - name: Install apt packages
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
     pkg: "{{ postgres_packages }}"
 
 - name: Copy configuration file
   become: true
-  template:
+  ansible.builtin.template:
     src: postgresql.conf.j2
     dest: /etc/postgresql/12/main/postgresql.conf
     owner: postgres
@@ -19,7 +19,7 @@
 
 - name: Copy client authentication configuration file
   become: true
-  copy:
+  ansible.builtin.copy:
     src: pg_hba.conf
     dest: /etc/postgresql/12/main/pg_hba.conf
     owner: postgres
@@ -29,20 +29,20 @@
 
 - name: Create project locale
   become: true
-  locale_gen:
+  community.general.locale_gen:
     name: "{{ locale }}"
 
 - name: Create a DB user
   become: true
   become_user: postgres
-  postgresql_user:
+  community.postgresql.postgresql_user:
     name: "{{ database_user }}"
     password: "{{ db_pass }}"
 
 - name: Create the database
   become: true
   become_user: postgres
-  postgresql_db:
+  community.postgresql.postgresql_db:
     name: "{{ database_name }}"
     owner: "{{ database_user }}"
     encoding: UTF8

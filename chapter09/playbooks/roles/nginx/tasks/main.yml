@@ -2,14 +2,14 @@
 
 - name: Install nginx webserver
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
     pkg: nginx
 
 - name: Ensure config path exists
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ nginx_conf_path }}"
     state: directory
     mode: 0755
@@ -17,7 +17,7 @@
 
 - name: Create ssl certificates
   become: true
-  command: >
+  ansible.builtin.command: >
     openssl req -new -x509 -nodes -out {{ mezzanine_proj_name }}.crt
     -keyout {{ mezzanine_proj_name }}.key -subj '/CN={{ domains[0] }}' -days 3650
     chdir={{ nginx_conf_path }}
@@ -27,7 +27,7 @@
 
 - name: Set the nginx config file
   become: true
-  template:
+  ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/sites-available/mezzanine.conf
     mode: 0755
@@ -35,7 +35,7 @@
 
 - name: Enable the nginx config file
   become: true
-  file:
+  ansible.builtin.file:
     src: /etc/nginx/sites-available/mezzanine.conf
     dest: /etc/nginx/sites-enabled/mezzanine.conf
     state: link
@@ -43,7 +43,7 @@
 
 - name: Remove the default nginx config file
   become: true
-  file:
+  ansible.builtin.file:
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: Restart nginx

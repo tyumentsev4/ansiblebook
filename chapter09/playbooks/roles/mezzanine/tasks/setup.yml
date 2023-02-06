@@ -1,13 +1,13 @@
 ---
 
 - name: Create a logs directory
-  file:
+  ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/logs"
     state: directory
     mode: 0755
 
 - name: Check out the repository on the host
-  git:
+  ansible.builtin.git:
     repo: "{{ mezzanine_repo_url }}"
     dest: "{{ mezzanine_proj_path }}"
     version: master
@@ -17,7 +17,7 @@
     - repo
 
 - name: Create python3 virtualenv
-  pip:
+  ansible.builtin.pip:
     name:
       - pip
       - wheel
@@ -29,12 +29,12 @@
     - skip_ansible_lint
 
 - name: Copy requirements.txt to home directory
-  copy:
+  ansible.builtin.copy:
     src: "{{ files_src_path | default() }}requirements.txt"
     dest: "{{ mezzanine_reqs_path }}"
     mode: 0644
 
 - name: Install packages listed in requirements.txt
-  pip:
+  ansible.builtin.pip:
     virtualenv: "{{ mezzanine_venv_path }}"
     requirements: "{{ mezzanine_reqs_path }}"
