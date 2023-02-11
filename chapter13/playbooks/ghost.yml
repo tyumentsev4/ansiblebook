@@ -6,17 +6,17 @@
   tasks:
 
     - name: Create Nginx image
-      docker_image:
+      community.docker.docker_image:
         build:
           path: ./nginx
         source: build
-        name: bbaassssiiee/nginx-ghost
+        name: tyumentsev4/nginx-ghost
         state: present
         force_source: "{{ force_source | default(false) }}"
         tag: "{{ tag | default('v1') }}"
 
     - name: Create certs
-      command: >
+      ansible.builtin.command: >
         openssl req -new -x509 -nodes
         -out certs/nginx.crt -keyout certs/nginx.key
         -subj '/CN=localhost' -days 365
@@ -24,7 +24,7 @@
         creates: certs/nginx.crt
 
     - name: Bring up services
-      docker_compose:
+      community.docker.docker_compose:
         project_src: .
         state: present
 ...

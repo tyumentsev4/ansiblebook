@@ -6,7 +6,7 @@
   become: true
   tasks:
     - name: Install packages
-      apt:
+      ansible.builtin.apt:
         name: "{{ item }}"
         update_cache: true
         cache_valid_time: 3600
@@ -19,17 +19,17 @@
         - software-properties-common
 
     - name: Add an apt signing key for Docker
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
     - name: Add apt repository for stable version
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
         state: present
 
     - name: Install Docker
-      apt:
+      ansible.builtin.apt:
         name: "{{ item }}"
         state: present
         update_cache: false
@@ -39,29 +39,29 @@
         - containerd.io
 
     - name: Install Docker python client
-      pip:
+      ansible.builtin.pip:
         name: docker
         state: present
 
     - name: Download docker-compose
-      get_url:
+      ansible.builtin.get_url:
         url: https://github.com/docker/compose/releases/download/v2.1.0/docker-compose-Linux-x86_64
         dest: /usr/local/bin/docker-compose
         mode: 0755
 
     - name: Grant docker to vagrant user
-      user:
+      ansible.builtin.user:
         name: vagrant
         groups: docker
 
 - name: Provision database machine
-  hosts: mysql
+  hosts: database
   become: true
   gather_facts: false
 
   tasks:
     - name: Install packages for mysql
-      apt:
+      ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
         name:
@@ -70,7 +70,7 @@
         state: present
 
     - name: Install requirements
-      pip:
+      ansible.builtin.pip:
         name: PyMySQL
         state: present
         executable: /usr/bin/pip3
